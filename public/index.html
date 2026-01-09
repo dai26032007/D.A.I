@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>D.A.I - Duel of Ancient Immortals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #020617; /* Nền đen sâu */
+            color: white;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+        }
+
+        /* --- PHẦN NỀN MỚI --- */
+        .bg-wrapper {
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            overflow: hidden;
+            background: #020617;
+        }
+
+        /* Các khối màu di chuyển (Orbs) */
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px); /* Làm mờ mạnh để tạo hiệu ứng khói/sáng */
+            opacity: 0.6;
+            animation: floatOrb 20s infinite ease-in-out alternate;
+        }
+
+        .orb-1 {
+            top: -10%;
+            left: -10%;
+            width: 80vmin;
+            height: 80vmin;
+            background: radial-gradient(circle, #7c3aed 0%, transparent 70%); /* Tím */
+            animation-duration: 25s;
+        }
+
+        .orb-2 {
+            bottom: -20%;
+            right: -10%;
+            width: 90vmin;
+            height: 90vmin;
+            background: radial-gradient(circle, #db2777 0%, transparent 70%); /* Hồng đậm */
+            animation-duration: 30s;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            top: 40%;
+            left: 60%;
+            width: 60vmin;
+            height: 60vmin;
+            background: radial-gradient(circle, #2563eb 0%, transparent 70%); /* Xanh dương */
+            opacity: 0.4;
+            animation-duration: 22s;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(5vmin, 10vmin) scale(1.1); }
+            100% { transform: translate(-5vmin, 5vmin) scale(0.9); }
+        }
+
+        /* Lớp lưới (Grid) tạo chiều sâu không gian */
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 8vmin 8vmin; /* Ô lưới to theo màn hình */
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            z-index: -1;
+            transform: perspective(100vmin) rotateX(10deg) scale(1.2); /* Nghiêng nhẹ tạo 3D */
+            transform-origin: center bottom;
+        }
+
+        /* Hạt bụi */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            box-shadow: 0 0 4px white; /* Hạt bụi phát sáng */
+            animation: floatUp 15s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+
+        /* --- CÁC STYLE CŨ (GIỮ NGUYÊN) --- */
+        .glass-panel {
+            background: rgba(20, 30, 60, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0.5vmin 2vmin rgba(0, 0, 0, 0.2);
+            border-radius: 9999px;
+        }
+
+        .glass-square {
+            background: rgba(20, 30, 60, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .character-img {
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            animation: breathe 5s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.3));
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .start-btn-soft {
+            background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+            box-shadow: 0 0.6vmin 0 #92400e, 0 1vmin 2vmin rgba(217, 119, 6, 0.4);
+            border-radius: 9999px;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn-soft:active:not(.btn-disabled) {
+            transform: translateY(0.6vmin);
+            box-shadow: 0 0 0 #92400e, 0 0 0 rgba(0,0,0,0);
+        }
+        
+        .ready-btn {
+            background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+            box-shadow: 0 0.6vmin 0 #14532d, 0 1vmin 2vmin rgba(22, 163, 74, 0.4);
+        }
+        .ready-btn:active:not(.btn-disabled) {
+            box-shadow: 0 0 0 #14532d;
+        }
+
+        .start-btn-soft::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            transform: rotate(45deg) translate(-100%, -100%);
+            animation: shimmer-diag 3s infinite;
+        }
+
+        @keyframes shimmer-diag {
+            0% { transform: rotate(45deg) translate(-150%, -150%); }
+            20% { transform: rotate(45deg) translate(150%, 150%); }
+            100% { transform: rotate(45deg) translate(150%, 150%); }
+        }
+
+        .avatar-frame {
+            background: linear-gradient(135deg, #f472b6, #9333ea);
+            padding: 0.4vmin;
+            border-radius: 50%;
+            box-shadow: 0 0 2vmin rgba(147, 51, 234, 0.5);
+        }
+
+        .menu-icon {
+            transition: transform 0.2s, color 0.2s;
+        }
+        .menu-icon:hover {
+            transform: translateY(-0.5vmin);
+        }
+        .menu-icon:active {
+            transform: scale(0.9);
+        }
+
+        .match-overlay-bg {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+        }
+
+        .invite-slot {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .pending-pulse {
+            animation: pulse-opacity 1.5s infinite;
+        }
+        @keyframes pulse-opacity {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .mode-card {
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .mode-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-0.5vmin);
+        }
+        .mode-card.active {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        #friend-sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .friend-item-avatar {
+            transition: filter 0.3s;
+        }
+        .status-dot {
+            box-shadow: 0 0 0.5vmin currentColor;
+        }
+        
+        .btn-disabled {
+            filter: grayscale(1) brightness(0.7);
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+        .btn-disabled::after {
+            display: none;
+        }
+
+        .vs-separator {
+            font-size: 2vmin;
+            font-weight: 900;
+            color: rgba(255,255,255,0.3);
+            text-align: center;
+            margin: 0.5vmin 0;
+            font-style: italic;
+        }
+
+        @media (orientation: portrait) {
+            .rotate-msg { display: flex; }
+            #app-interface { display: none; }
+        }
+        @media (orientation: landscape) {
+            .rotate-msg { display: none; }
+            #app-interface { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="rotate-msg fixed inset-0 bg-slate-900 z-[100] flex-col items-center justify-center text-white p-5 text-center hidden">
+        <i class="fa-solid fa-rotate text-6xl mb-4 text-yellow-400 animate-spin-slow" style="animation-duration: 3s;"></i>
+        <h2 class="text-2xl font-bold mb-2">Vui lòng xoay ngang</h2>
+        <p class="text-gray-400">Trải nghiệm sảnh game tốt nhất ở chế độ ngang</p>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-interface" class="w-full h-screen relative overflow-hidden">
+        
+        <!-- LAYER 1: NEW BACKGROUND -->
+        <div class="bg-wrapper">
+            <div class="bg-orb orb-1"></div>
+            <div class="bg-orb orb-2"></div>
+            <div class="bg-orb orb-3"></div>
+            <div class="bg-grid"></div>
+        </div>
+        <div id="particles-container"></div>
+
+        <!-- LAYER 2: CHARACTER -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+             <div class="character-img w-[80vh] h-[80vh] bg-contain bg-center bg-no-repeat mt-[5vh]"
+                  style="background-image: url('https://i.imgur.com/TnBRMae.png');">
+             </div>
+        </div>
+
+        <!-- LAYER 3: HUD UI -->
+        
+        <!-- TOP LEFT: Profile -->
+        <div class="absolute top-[3vmin] left-[4vmin] z-20 flex items-center gap-[1.5vmin] animate-[slideDown_0.5s_ease-out]">
+            <div class="avatar-frame w-[10vmin] h-[10vmin] relative cursor-pointer group">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-full h-full rounded-full bg-slate-800 object-cover">
+                <div class="absolute -bottom-[0.5vmin] -right-[0.5vmin] bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-[1.8vmin] font-black px-[1vmin] py-[0.2vmin] rounded-full border border-slate-900 shadow-md">LV.30</div>
+            </div>
+            <div class="flex flex-col">
+                <div class="glass-panel px-[2.5vmin] py-[0.8vmin] mb-[0.5vmin]">
+                    <h2 class="font-extrabold text-[2.5vmin] text-white tracking-wide shadow-black drop-shadow-md leading-none">GEMINI_PLAYER</h2>
+                </div>
+                <div class="flex items-center gap-[1vmin] pl-[0.5vmin]">
+                    <i class="fa-solid fa-medal text-yellow-400 text-[2.5vmin] drop-shadow"></i>
+                    <div class="text-[2vmin] font-bold text-gray-200">Cao Thủ I</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP RIGHT: Utils -->
+        <div class="absolute top-[3vmin] right-[4vmin] z-20 flex items-start gap-[1.5vmin] animate-[slideDown_0.5s_ease-out_0.1s]">
+            <!-- Invite Sim Button -->
+            <button id="sim-invite-btn" onclick="simReceiveInvite()" class="glass-panel w-[7vmin] h-[7vmin] flex items-center justify-center cursor-pointer hover:bg-white/10 transition text-green-400 hover:text-white" title="Giả lập nhận lời mời">
+                <i class="fa-regular fa-envelope text-[3vmin]"></i>
+            </button>
+
+            <!-- Vàng -->
+            <div class="glass-panel px-[2.5vmin] flex items-center gap-[1.5vmin] h-[7vmin] hover:bg-white/10 transition cursor-pointer">
+                <i class="fa-solid fa-coins text-yellow-400 text-[3vmin] drop-shadow-[0_2px_4px_rgba(234,179,8,0.6)]"></i>
+                <div class="flex flex-col items-end leading-none">
+                    <span class="font-black text-[2.2vmin] text-white">12,450</span>
+                </div>
+                <div class="w-[3.5vmin] h-[3.5vmin] bg-yellow-500 rounded-full flex items-center justify-center text-black text-[1.5vmin] hover:scale-110 transition shadow-lg">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </div>
+            
+            <!-- Friend Toggle -->
+            <div id="btn-toggle-friends" class="glass-panel w-[7vmin] h-[7vmin] flex items-center justify-center cursor-pointer hover:bg-white/10 transition text-gray-300 hover:text-white relative" onclick="toggleFriendSidebar()">
+                <i class="fa-solid fa-user-group text-[3vmin]"></i>
+                <div class="absolute top-0 right-0 w-[1.5vmin] h-[1.5vmin] bg-red-500 rounded-full border border-[#0f172a]"></div>
+            </div>
+
+            <!-- Settings -->
+            <div class="glass-panel w-[7vmin] h-[7vmin] flex items-center justify-center cursor-pointer hover:rotate-90 transition duration-300 text-gray-300 hover:text-white">
+                <i class="fa-solid fa-gear text-[3vmin]"></i>
+            </div>
+        </div>
+
+        <!-- BOTTOM LEFT: Menu -->
+        <div class="absolute bottom-[3vmin] left-[4vmin] z-20 animate-[slideUp_0.5s_ease-out_0.2s]">
+            <nav class="glass-panel px-[3vmin] py-[1.5vmin] flex gap-[4vmin] items-center">
+                <div class="menu-icon flex flex-col items-center gap-[0.5vmin] cursor-pointer text-gray-300">
+                    <div class="w-[6vmin] h-[6vmin] rounded-full bg-white/5 flex items-center justify-center mb-[0.5vmin] group-hover:bg-yellow-500/20">
+                        <i class="fa-solid fa-shop text-[3vmin] group-hover:text-yellow-400"></i>
+                    </div>
+                    <span class="text-[1.5vmin] font-bold uppercase tracking-wider">Shop</span>
+                </div>
+                <div class="menu-icon flex flex-col items-center gap-[0.5vmin] cursor-pointer text-gray-300">
+                    <div class="w-[6vmin] h-[6vmin] rounded-full bg-white/5 flex items-center justify-center mb-[0.5vmin] group-hover:bg-purple-500/20">
+                        <i class="fa-solid fa-mask text-[3vmin] group-hover:text-purple-400"></i>
+                    </div>
+                    <span class="text-[1.5vmin] font-bold uppercase tracking-wider">Tướng</span>
+                </div>
+                <div class="menu-icon flex flex-col items-center gap-[0.5vmin] cursor-pointer text-gray-300">
+                    <div class="w-[6vmin] h-[6vmin] rounded-full bg-white/5 flex items-center justify-center mb-[0.5vmin] group-hover:bg-green-500/20">
+                        <i class="fa-solid fa-bag-shopping text-[3vmin] group-hover:text-green-400"></i>
+                    </div>
+                    <span class="text-[1.5vmin] font-bold uppercase tracking-wider">Túi đồ</span>
+                </div>
+            </nav>
+        </div>
+
+        <!-- BOTTOM RIGHT: Start Area -->
+        <div class="absolute bottom-[3vmin] right-[4vmin] z-20 flex flex-col items-end gap-[2vmin] animate-[slideUp_0.5s_ease-out_0.3s]">
+            
+            <div class="flex items-end gap-[2vmin] mr-[1vmin]">
+                <!-- Invite Slots -->
+                <div id="invite-slots-container" class="flex flex-col gap-[1vmin] mb-[0.5vmin]"></div>
+
+                <!-- Mode Selector -->
+                <div id="btn-mode-select" class="glass-panel px-[2vmin] py-[1vmin] cursor-pointer hover:bg-white/10 transition flex flex-col items-end min-w-[15vmin] active:scale-95 group">
+                    <span class="text-[1vmin] font-bold text-gray-400 uppercase">Chế độ</span>
+                    <div class="flex items-center gap-[0.5vmin]">
+                        <span id="current-mode-name" class="font-black text-[2vmin] text-yellow-400 italic">XẾP HẠNG</span>
+                        <i class="fa-solid fa-chevron-down text-[1vmin] text-gray-500 group-hover:translate-y-[0.3vmin] transition"></i>
+                    </div>
+                    <span id="current-mode-sub" class="text-[1vmin] text-gray-400 font-bold">Team 2 người</span>
+                    <div id="mode-lock-icon" class="hidden absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-lock text-white/50 text-[2.5vmin]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-[2vmin]">
+                <!-- NÚT RỜI PHÒNG (Cho khách) -->
+                <button id="btn-leave-room" onclick="leaveRoom()" class="hidden w-[9vmin] h-[9vmin] rounded-full bg-red-500/80 hover:bg-red-500 border border-red-400 flex items-center justify-center text-white shadow-lg transition" title="Rời phòng">
+                    <i class="fa-solid fa-right-from-bracket text-[4vmin]"></i>
+                </button>
+
+                <!-- START / READY BUTTON -->
+                <button id="btn-start" class="start-btn-soft w-[35vmin] h-[11vmin] flex items-center justify-between px-[3vmin] cursor-pointer group">
+                    <div id="start-btn-icon" class="w-[7vmin] h-[7vmin] rounded-full bg-black/20 flex items-center justify-center text-yellow-200">
+                        <i class="fa-solid fa-gamepad text-[3vmin] group-hover:rotate-12 transition"></i>
+                    </div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span id="start-btn-text" class="text-[4vmin] font-black italic text-white drop-shadow-md uppercase tracking-tight group-hover:scale-105 transition leading-none">VÀO TRẬN</span>
+                        <span id="start-btn-sub" class="text-[1.5vmin] font-bold text-yellow-100/80 uppercase tracking-widest bg-black/10 px-[1vmin] rounded-full mt-[0.5vmin]">Sẵn sàng</span>
+                    </div>
+                    <i class="fa-solid fa-caret-right text-[4vmin] text-white/50 group-hover:text-white group-hover:translate-x-[0.5vmin] transition"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- === FRIEND SIDEBAR === -->
+        <div id="friend-sidebar" class="absolute top-0 right-0 h-full w-[40vmin] max-w-sm glass-square z-40 transform translate-x-full border-r-0 border-t-0 border-b-0 rounded-none flex flex-col">
+            <div class="p-[2vmin] border-b border-white/10 flex justify-between items-center bg-black/20">
+                <div class="flex items-center gap-[1vmin]">
+                    <i class="fa-solid fa-user-group text-yellow-400 text-[2.5vmin]"></i>
+                    <span class="font-bold text-[2vmin] uppercase tracking-wider">Bạn Bè (3/25)</span>
+                </div>
+                <div class="cursor-pointer text-gray-400 hover:text-white" onclick="toggleFriendSidebar()">
+                    <i class="fa-solid fa-xmark text-[3vmin]"></i>
+                </div>
+            </div>
+            <div id="friend-list-content" class="flex-1 overflow-y-auto p-[1vmin] space-y-[0.5vmin]"></div>
+            <div class="p-[1.5vmin] border-t border-white/10 bg-black/20">
+                <button class="w-full py-[1.5vmin] bg-white/5 hover:bg-white/10 rounded-[1vmin] text-[1.8vmin] font-bold uppercase text-gray-400 border border-white/10 transition">
+                    <i class="fa-solid fa-magnifying-glass mr-[1vmin]"></i>Tìm bạn bè
+                </button>
+            </div>
+        </div>
+
+        <!-- === OVERLAYS === -->
+        <!-- Invite Friend Modal -->
+        <div id="invite-friend-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-[2vmin]">
+            <div class="glass-square w-[50vmin] max-w-md rounded-[2vmin] p-[2vmin] flex flex-col max-h-[80vh]">
+                <div class="flex justify-between items-center mb-[2vmin] pb-[1vmin] border-b border-white/10">
+                    <h3 class="font-bold text-[2.5vmin] text-yellow-400 uppercase italic">Mời vào phòng</h3>
+                    <button onclick="closeInviteModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-[3vmin]"></i></button>
+                </div>
+                <div id="invite-list-container" class="flex-1 overflow-y-auto space-y-[1vmin]"></div>
+            </div>
+        </div>
+
+        <!-- Receive Invite Modal -->
+        <div id="receive-invite-modal" class="absolute inset-0 bg-black/80 backdrop-blur-md z-[60] hidden flex-col items-center justify-center p-[2vmin] animate-[popIn_0.3s]">
+            <div class="w-[50vmin] max-w-md glass-square rounded-[3vmin] p-[3vmin] relative overflow-hidden border-2 border-yellow-500/30">
+                <div class="absolute -top-[5vmin] -left-[5vmin] w-[20vmin] h-[20vmin] bg-blue-500/20 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-[5vmin] -right-[5vmin] w-[20vmin] h-[20vmin] bg-purple-500/20 rounded-full blur-2xl"></div>
+                <h3 class="text-center font-bold text-gray-300 uppercase tracking-widest text-[1.8vmin] mb-[2vmin]">Lời mời tham gia</h3>
+                <div class="flex items-center gap-[2vmin] mb-[3vmin]">
+                    <div class="w-[10vmin] h-[10vmin] rounded-full border-2 border-yellow-400 p-[0.5vmin]">
+                        <img id="inviter-avatar" src="" class="w-full h-full rounded-full bg-slate-800 object-cover">
+                    </div>
+                    <div>
+                        <div id="inviter-name" class="text-[3vmin] font-black text-white leading-none">Name</div>
+                        <div class="text-[1.8vmin] text-gray-300 mt-[0.5vmin]">đang mời bạn vào <span class="text-yellow-400 font-bold italic">Custom Room</span></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-[1.5vmin] mb-[1.5vmin]">
+                    <button onclick="closeReceiveInvite()" class="py-[1.5vmin] rounded-[1.5vmin] border border-white/20 hover:bg-white/10 font-bold text-gray-300 transition uppercase text-[1.8vmin]">Từ chối</button>
+                    <button onclick="acceptReceiveInvite()" class="py-[1.5vmin] rounded-[1.5vmin] bg-gradient-to-r from-yellow-500 to-orange-600 font-bold text-black hover:brightness-110 transition uppercase text-[1.8vmin] shadow-lg">Đồng ý</button>
+                </div>
+                <button onclick="blockInvites()" class="w-full py-[1vmin] rounded-[1vmin] bg-red-900/40 hover:bg-red-900/60 text-red-300 text-[1.5vmin] font-bold uppercase transition flex items-center justify-center gap-[1vmin]">
+                    <i class="fa-solid fa-ban"></i> Chặn mời 5 phút
+                </button>
+            </div>
+        </div>
+
+        <!-- Mode Selection Overlay -->
+        <div id="mode-selection-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-[2vmin]">
+            <h2 class="text-[4vmin] font-black text-white uppercase italic mb-[4vmin] tracking-wider drop-shadow-lg">Chọn Chế Độ Chơi</h2>
+            <div class="grid grid-cols-2 gap-[3vmin] w-[80vmin] max-w-4xl">
+                <!-- Đấu Thường -->
+                <div class="mode-card glass-square p-[3vmin] flex flex-col items-center justify-center cursor-pointer gap-[2vmin] group rounded-[2vmin]" onclick="selectMode('normal')">
+                    <i class="fa-solid fa-user text-[5vmin] text-blue-400 mb-[1vmin] group-hover:scale-110 transition"></i>
+                    <div class="text-center">
+                        <h3 class="text-[2.5vmin] font-black uppercase">Đấu Thường</h3>
+                        <p class="text-[1.5vmin] text-gray-400 mt-[0.5vmin]">Solo - Ghép ngẫu nhiên</p>
+                    </div>
+                </div>
+                
+                <!-- Xếp Hạng -->
+                <div class="mode-card glass-square p-[3vmin] flex flex-col items-center justify-center cursor-pointer gap-[2vmin] active rounded-[2vmin]" onclick="selectMode('rank')">
+                    <i class="fa-solid fa-medal text-[5vmin] text-yellow-400 mb-[1vmin] group-hover:scale-110 transition"></i>
+                    <div class="text-center">
+                        <h3 class="text-[2.5vmin] font-black uppercase text-yellow-400">Xếp Hạng</h3>
+                        <p class="text-[1.5vmin] text-gray-400 mt-[0.5vmin]">Team 2 - Leo Rank</p>
+                    </div>
+                </div>
+
+                <!-- Custom Solo -->
+                <div class="mode-card glass-square p-[3vmin] flex items-center justify-start cursor-pointer gap-[2vmin] group rounded-[2vmin] hover:bg-white/5" onclick="selectMode('custom_solo')">
+                    <div class="w-[8vmin] h-[8vmin] rounded-full bg-green-500/20 flex items-center justify-center border-2 border-green-500 shrink-0">
+                        <i class="fa-solid fa-users text-[3.5vmin] text-green-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-[2.2vmin] font-black uppercase text-green-400">Tùy Chọn Đơn</h3>
+                        <p class="text-[1.5vmin] text-gray-400 mt-[0.5vmin]">Loạn đấu (Min 2 - Max 4)</p>
+                    </div>
+                </div>
+
+                 <!-- Custom 2vs2 -->
+                 <div class="mode-card glass-square p-[3vmin] flex items-center justify-start cursor-pointer gap-[2vmin] group rounded-[2vmin] hover:bg-white/5" onclick="selectMode('custom_2v2')">
+                    <div class="w-[8vmin] h-[8vmin] rounded-full bg-red-500/20 flex items-center justify-center border-2 border-red-500 shrink-0">
+                        <i class="fa-solid fa-people-arrows text-[3.5vmin] text-red-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-[2.2vmin] font-black uppercase text-red-400">Tùy Chọn 2vs2</h3>
+                        <p class="text-[1.5vmin] text-gray-400 mt-[0.5vmin]">Đấu Đội (Full 4)</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeModeSelection()" class="mt-[4vmin] px-[5vmin] py-[1.5vmin] rounded-full border border-white/20 hover:bg-white/10 text-gray-300 hover:text-white uppercase font-bold text-[1.8vmin] transition">Đóng</button>
+        </div>
+
+        <!-- Matchmaking Overlay -->
+        <div id="matchmaking-overlay" class="match-overlay-bg absolute inset-0 z-50 hidden flex-col items-center justify-center">
+            <div class="relative w-[25vmin] h-[25vmin] flex items-center justify-center">
+                <div class="absolute inset-0 border-4 border-white/10 rounded-full"></div>
+                <div class="absolute inset-0 border-t-4 border-t-yellow-400 rounded-full animate-spin"></div>
+                <div class="absolute inset-[2vmin] border-b-4 border-b-purple-500 rounded-full animate-[spin_2s_linear_infinite_reverse]"></div>
+                <div class="text-center z-10 flex flex-col items-center">
+                    <span class="text-[1.5vmin] font-bold text-gray-400 uppercase tracking-widest mb-[1vmin]">Đang tìm đối thủ...</span>
+                    <div id="match-timer" class="text-[5vmin] font-mono font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">00:00</div>
+                </div>
+            </div>
+            <button id="cancel-match" class="mt-[5vmin] w-[6vmin] h-[6vmin] rounded-full border border-red-500/50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                <i class="fa-solid fa-xmark text-[3vmin]"></i>
+            </button>
+        </div>
+
+        <!-- Match Found Overlay -->
+        <div id="match-found-overlay" class="absolute inset-0 z-[60] bg-black/90 hidden flex-col items-center justify-center">
+            <div class="absolute w-[50vmin] h-[50vmin] bg-yellow-500/20 rounded-full filter blur-[100px] animate-pulse"></div>
+            <h1 class="text-[8vmin] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-yellow-400 italic uppercase drop-shadow-lg scale-110 mb-[5vmin] animate-[bounce_1s_infinite]">TRẬN ĐẤU!</h1>
+            <div class="flex items-center gap-[8vmin] relative z-10">
+                <div class="flex flex-col items-center gap-[1.5vmin]">
+                    <div class="w-[12vmin] h-[12vmin] rounded-full p-[0.5vmin] bg-gradient-to-b from-blue-400 to-blue-600 shadow-[0_0_20px_#3b82f6]">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-full h-full rounded-full bg-slate-800">
+                    </div>
+                    <span class="font-bold text-[2.5vmin] text-blue-400">Team Bạn</span>
+                </div>
+                <span class="text-[6vmin] font-black text-white italic opacity-50">VS</span>
+                <div class="flex flex-col items-center gap-[1.5vmin]">
+                    <div class="w-[12vmin] h-[12vmin] rounded-full p-[0.5vmin] bg-gradient-to-b from-red-400 to-red-600 shadow-[0_0_20px_#ef4444]">
+                        <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
+                            <i class="fa-solid fa-question text-[5vmin] text-red-500"></i>
+                        </div>
+                    </div>
+                    <span class="font-bold text-[2.5vmin] text-red-400">Đối thủ</span>
+                </div>
+            </div>
+            <div class="w-[40vmin] h-[2vmin] border-2 border-yellow-600 rounded-full mt-[6vmin] p-[0.3vmin] relative overflow-hidden bg-black/50">
+                <div id="accept-progress" class="h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full w-full transition-all duration-[5000ms] ease-linear shadow-[0_0_15px_#eab308]"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-[1.2vmin] font-bold text-white uppercase tracking-widest pointer-events-none drop-shadow-md">Tự động từ chối</div>
+            </div>
+            <button id="accept-btn" class="mt-[4vmin] bg-blue-600 text-white w-[30vmin] py-[2vmin] rounded-full font-black text-[2.5vmin] shadow-[0_0.5vmin_0_#1e40af] active:translate-y-[0.3vmin] active:shadow-none transition hover:brightness-110 uppercase tracking-wider">
+                CHẤP NHẬN
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        /* === GAME DATA & STATE === */
+        const friendsData = [
+            { id: 1, name: "Sát Thủ Đêm", avatar: "Aidan", rank: "Kim Cương I", status: "online", time: "" },
+            { id: 2, name: "Bé Mèo Cute", avatar: "Cuddles", rank: "Bạch Kim III", status: "online", time: "" },
+            { id: 3, name: "Thần Rừng", avatar: "Bear", rank: "Cao Thủ", status: "ingame", time: "12:45" },
+            { id: 4, name: "Best Yasuo", avatar: "Zack", rank: "Vàng I", status: "ingame", time: "05:20" },
+            { id: 5, name: "Trùm Feed", avatar: "Bob", rank: "Bạc II", status: "offline", time: "25p trước" },
+            { id: 6, name: "Người Lạ", avatar: "Jack", rank: "Đồng I", status: "offline", time: "2h trước" },
+            { id: 7, name: "Top 1 Sever", avatar: "King", rank: "Thách Đấu", status: "ingame", time: "20:01" },
+            { id: 8, name: "Gánh Team", avatar: "Leo", rank: "Lục Bảo II", status: "online", time: "" },
+        ];
+
+        let currentParty = []; 
+        let invitingSlotIndex = -1;
+        let isHost = true; 
+        let isReady = false; 
+        let currentModeKey = 'rank';
+        let isInviteBlocked = false;
+        let blockTimer = null;
+
+        /* === INITIALIZATION === */
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            for (let i = 0; i < 25; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2 + 'px';
+                particle.style.width = size;
+                particle.style.height = size;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        /* === SIDEBAR LOGIC === */
+        const friendSidebar = document.getElementById('friend-sidebar');
+        const friendContent = document.getElementById('friend-list-content');
+        let isFriendSidebarOpen = false;
+
+        function toggleFriendSidebar() {
+            isFriendSidebarOpen = !isFriendSidebarOpen;
+            if (isFriendSidebarOpen) {
+                friendSidebar.classList.remove('translate-x-full');
+                renderFriends();
+            } else {
+                friendSidebar.classList.add('translate-x-full');
+            }
+        }
+
+        function renderFriends() {
+            friendContent.innerHTML = '';
+            const sortedFriends = [...friendsData].sort((a, b) => {
+                const order = { 'online': 1, 'ingame': 2, 'offline': 3 };
+                return order[a.status] - order[b.status];
+            });
+
+            const hasEmptySlot = currentParty.some(p => p.status === 'empty');
+            const isNotSolo = currentModeKey !== 'normal';
+            
+            let canInvite = false;
+            if (isNotSolo && hasEmptySlot) {
+                if (isHost) {
+                    canInvite = true;
+                } else {
+                    if (currentModeKey.includes('custom')) {
+                        canInvite = true;
+                    }
+                }
+            }
+
+            sortedFriends.forEach(friend => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-[1.5vmin] p-[1vmin] rounded-lg hover:bg-white/5 transition group cursor-pointer';
+                
+                let statusColor = 'bg-gray-500';
+                let statusText = 'Offline';
+                let avatarFilter = 'grayscale';
+                let subInfo = friend.time;
+                let actionBtn = '';
+
+                if (friend.status === 'online') {
+                    statusColor = 'bg-green-500 shadow-[0_0_8px_#22c55e]';
+                    statusText = 'Online';
+                    avatarFilter = '';
+                    subInfo = friend.rank;
+                    if (canInvite) {
+                        actionBtn = `<button class="w-[4vmin] h-[4vmin] rounded-full bg-yellow-500 text-black flex items-center justify-center hover:bg-yellow-400 transition" onclick="event.stopPropagation(); quickInvite(${friend.id})"><i class="fa-solid fa-plus text-[1.5vmin]"></i></button>`;
+                    }
+                } else if (friend.status === 'ingame') {
+                    statusColor = 'bg-red-500';
+                    statusText = 'Trong trận';
+                    avatarFilter = '';
+                    subInfo = `<i class="fa-regular fa-clock mr-[0.5vmin]"></i>${friend.time}`;
+                }
+
+                item.innerHTML = `
+                    <div class="relative w-[6vmin] h-[6vmin]">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.avatar}" class="w-full h-full rounded-full bg-slate-800 object-cover ${avatarFilter} friend-item-avatar border border-white/10">
+                        <div class="absolute bottom-0 right-0 w-[1.8vmin] h-[1.8vmin] ${statusColor} rounded-full border-2 border-[#1e293b] status-dot"></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold text-[1.8vmin] truncate group-hover:text-yellow-400 transition">${friend.name}</div>
+                        <div class="text-[1.2vmin] ${friend.status === 'ingame' ? 'text-red-400' : (friend.status === 'online' ? 'text-green-400' : 'text-gray-500')} uppercase font-bold tracking-wide flex items-center">
+                            ${friend.status === 'ingame' ? subInfo : statusText}
+                        </div>
+                         ${friend.status === 'online' ? `<div class="text-[1.2vmin] text-gray-400 truncate">${friend.rank}</div>` : (friend.status === 'offline' ? `<div class="text-[1.2vmin] text-gray-600">${subInfo}</div>` : '')}
+                    </div>
+                    ${actionBtn}
+                `;
+                friendContent.appendChild(item);
+            });
+        }
+
+        /* === LOGIC PARTY & INVITE === */
+        
+        function openInviteModalForSlot(index) {
+            if (!isHost && !currentModeKey.includes('custom')) return;
+            
+            invitingSlotIndex = index;
+            const modal = document.getElementById('invite-friend-overlay');
+            const listContainer = document.getElementById('invite-list-container');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            listContainer.innerHTML = '';
+
+            const availableFriends = friendsData.filter(f => f.status === 'online' && !currentParty.some(p => p.status !== 'empty' && p.friend && p.friend.id === f.id));
+
+            if(availableFriends.length === 0) {
+                listContainer.innerHTML = '<div class="text-center text-gray-400 italic py-[2vmin] text-[1.5vmin]">Không có bạn bè online</div>';
+                return;
+            }
+
+            availableFriends.forEach(friend => {
+                const el = document.createElement('div');
+                el.className = 'flex items-center justify-between p-[1.5vmin] rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition';
+                el.onclick = () => confirmInvite(friend);
+                el.innerHTML = `
+                    <div class="flex items-center gap-[1.5vmin]">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.avatar}" class="w-[5vmin] h-[5vmin] rounded-full bg-slate-800 border border-white/20">
+                        <div>
+                            <div class="font-bold text-[1.8vmin] text-white">${friend.name}</div>
+                            <div class="text-[1.2vmin] text-yellow-400 font-bold">${friend.rank}</div>
+                        </div>
+                    </div>
+                    <div class="w-[4vmin] h-[4vmin] rounded-full border border-yellow-500/50 flex items-center justify-center text-yellow-400 hover:bg-yellow-500 hover:text-black transition">
+                        <i class="fa-solid fa-plus text-[1.5vmin]"></i>
+                    </div>
+                `;
+                listContainer.appendChild(el);
+            });
+        }
+
+        function closeInviteModal() {
+            document.getElementById('invite-friend-overlay').classList.add('hidden');
+            document.getElementById('invite-friend-overlay').classList.remove('flex');
+        }
+
+        function confirmInvite(friend) {
+            if(invitingSlotIndex !== -1) {
+                currentParty[invitingSlotIndex] = { status: 'pending', friend: friend };
+                renderPartySlots();
+                updateStartButtonState(); 
+                closeInviteModal();
+
+                setTimeout(() => {
+                    // Fix: Null check an toàn hơn
+                    if(currentParty[invitingSlotIndex] && 
+                       currentParty[invitingSlotIndex].friend && 
+                       currentParty[invitingSlotIndex].friend.id === friend.id && 
+                       currentParty[invitingSlotIndex].status === 'pending') {
+                        currentParty[invitingSlotIndex].status = 'joined';
+                        renderPartySlots();
+                        updateStartButtonState(); 
+                    }
+                }, 3000);
+            }
+        }
+
+        function quickInvite(friendId) {
+            if (!isHost && !currentModeKey.includes('custom')) return;
+
+            const friend = friendsData.find(f => f.id === friendId);
+            if (!friend) return;
+            
+            const emptyIndex = currentParty.findIndex(p => p.status === 'empty');
+            if (emptyIndex !== -1) {
+                if (currentParty.some(p => p.status !== 'empty' && p.friend.id === friend.id)) {
+                    alert(`${friend.name} đã ở trong phòng!`);
+                    return;
+                }
+                invitingSlotIndex = emptyIndex;
+                confirmInvite(friend);
+            } else {
+                alert("Phòng đã đầy!");
+            }
+        }
+
+        function kickMember(index) {
+            if (!isHost) return; 
+
+            const slot = currentParty[index];
+            if(slot.status !== 'empty') {
+                const action = slot.status === 'pending' ? 'hủy lời mời' : 'đuổi';
+                if(confirm(`Bạn muốn ${action} ${slot.friend.name}?`)) {
+                    currentParty[index] = { status: 'empty', friend: null };
+                    renderPartySlots();
+                    updateStartButtonState(); 
+                }
+            }
+        }
+
+        function renderPartySlots() {
+            const container = document.getElementById('invite-slots-container');
+            container.innerHTML = '';
+            
+            currentParty.forEach((slotData, index) => {
+                if (currentModeKey === 'custom_2v2' && index === 1) {
+                    const separator = document.createElement('div');
+                    separator.className = 'vs-separator';
+                    separator.innerText = 'VS';
+                    container.appendChild(separator);
+                }
+
+                const slot = document.createElement('div');
+                slot.className = 'invite-slot relative group transition';
+                
+                let borderColorClass = 'border-gray-400';
+                let avatarBorderClass = 'border-blue-500';
+                
+                if (currentModeKey === 'custom_2v2') {
+                    if (index === 0) { 
+                        avatarBorderClass = 'border-blue-500 shadow-[0_0_10px_#3b82f6]'; 
+                    } else {
+                        avatarBorderClass = 'border-red-500 shadow-[0_0_10px_#ef4444]';
+                    }
+                }
+
+                const canInteract = isHost || currentModeKey.includes('custom');
+                if (canInteract) slot.classList.add('cursor-pointer');
+                
+                if (slotData.status === 'empty') {
+                    slot.innerHTML = `
+                        <div class="w-[8vmin] h-[8vmin] rounded-full border-2 border-dashed ${currentModeKey === 'custom_2v2' ? (index === 0 ? 'border-blue-400/50' : 'border-red-400/50') : 'border-gray-400'} bg-black/30 flex items-center justify-center text-gray-400 hover:text-white hover:border-white transition">
+                            <i class="fa-solid fa-plus text-[3vmin] group-hover:scale-110 transition"></i>
+                        </div>
+                        ${canInteract ? `<div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black/80 px-[1vmin] py-[0.5vmin] rounded text-[1.2vmin] text-white opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Mời bạn</div>` : ''}
+                    `;
+                    if(canInteract) slot.onclick = () => openInviteModalForSlot(index);
+                } else {
+                    const friend = slotData.friend;
+                    const isPending = slotData.status === 'pending';
+                    
+                    let kickBtn = '';
+                    if (isHost) {
+                        kickBtn = `<div onclick="event.stopPropagation(); kickMember(${index})" class="absolute -top-[0.5vmin] -right-[0.5vmin] w-[2.5vmin] h-[2.5vmin] bg-red-500 rounded-full flex items-center justify-center text-white text-[1.5vmin] hover:scale-110 cursor-pointer shadow-sm border border-black z-20">
+                                <i class="fa-solid fa-xmark"></i>
+                            </div>`;
+                    }
+
+                    slot.innerHTML = `
+                        <div class="relative w-[8vmin] h-[8vmin] ${isPending ? 'pending-pulse' : ''}">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.avatar}" class="w-full h-full rounded-full bg-slate-800 border-2 ${isPending ? 'border-gray-500 grayscale' : avatarBorderClass} object-cover">
+                            ${kickBtn}
+                        </div>
+                        <div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black/80 px-[1vmin] py-[0.5vmin] rounded text-[1.2vmin] text-white opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10 pointer-events-none">
+                            <div class="font-bold">${friend.name}</div>
+                            <div class="${isPending ? 'text-gray-400 italic' : 'text-yellow-400 font-bold'} text-[1vmin]">
+                                ${isPending ? 'Đang chờ...' : friend.rank}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                slot.style.animationDelay = `${index * 0.1}s`;
+                container.appendChild(slot);
+            });
+        }
+
+        /* === LOGIC LEAVE ROOM === */
+        function leaveRoom() {
+            if(confirm("Bạn có chắc muốn rời phòng?")) {
+                isHost = true;
+                isReady = false;
+                selectMode('rank'); 
+                document.getElementById('btn-leave-room').classList.add('hidden');
+                
+                const modeBtn = document.getElementById('btn-mode-select');
+                modeBtn.classList.remove('btn-disabled');
+                document.getElementById('mode-lock-icon').classList.add('hidden');
+                
+                alert("Đã rời phòng thành công!");
+            }
+        }
+
+        /* === LOGIC BLOCK INVITE === */
+        function blockInvites() {
+            isInviteBlocked = true;
+            closeReceiveInvite();
+            alert("Đã chặn lời mời trong 5 phút!");
+            
+            if (blockTimer) clearTimeout(blockTimer);
+            blockTimer = setTimeout(() => {
+                isInviteBlocked = false;
+            }, 300000); 
+        }
+
+        /* === LOGIC JOIN ROOM AS GUEST === */
+        function simReceiveInvite() {
+            if (!isHost) {
+                alert("Bạn đang trong phòng khác rồi!");
+                return;
+            }
+            if (isInviteBlocked) {
+                return;
+            }
+
+            const randomFriend = friendsData[Math.floor(Math.random() * friendsData.length)];
+            const modal = document.getElementById('receive-invite-modal');
+            
+            document.getElementById('inviter-name').innerText = randomFriend.name;
+            document.getElementById('inviter-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${randomFriend.avatar}`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeReceiveInvite() {
+            document.getElementById('receive-invite-modal').classList.add('hidden');
+            document.getElementById('receive-invite-modal').classList.remove('flex');
+        }
+
+        function acceptReceiveInvite() {
+            closeReceiveInvite();
+            
+            isHost = false;
+            isReady = false;
+            currentModeKey = 'rank';
+            
+            document.getElementById('btn-leave-room').classList.remove('hidden');
+            
+            const hostName = document.getElementById('inviter-name').innerText;
+            const hostAvatar = document.getElementById('inviter-avatar').src.split('=')[1];
+            
+            currentParty = [
+                { status: 'joined', friend: { name: hostName, avatar: hostAvatar, rank: 'Chủ phòng' }}
+            ];
+            
+            renderPartySlots();
+            updateUIForGuest();
+            alert(`Đã tham gia phòng của ${hostName}!`);
+        }
+
+        function updateUIForGuest() {
+            const modeBtn = document.getElementById('btn-mode-select');
+            modeBtn.classList.add('btn-disabled'); 
+            document.getElementById('mode-lock-icon').classList.remove('hidden'); 
+
+            const modeNameEl = document.getElementById('current-mode-name');
+            const modeSubEl = document.getElementById('current-mode-sub');
+            modeNameEl.innerText = "XẾP HẠNG";
+            modeSubEl.innerText = "Team 2 người";
+
+            updateStartButtonState();
+        }
+
+        function updateStartButtonState() {
+            const btn = document.getElementById('btn-start');
+            const btnText = document.getElementById('start-btn-text');
+            const btnSub = document.getElementById('start-btn-sub');
+            const btnIcon = document.getElementById('start-btn-icon');
+
+            if (isHost) {
+                btn.classList.remove('ready-btn');
+                btnText.innerText = "VÀO TRẬN"; 
+                
+                let canStart = true;
+                let reason = "Tìm trận ngayngay";
+                
+                const joinedCount = currentParty.filter(p => p.status === 'joined').length;
+                const totalPlayers = joinedCount + 1; 
+
+                if (currentModeKey === 'rank') {
+                    if (totalPlayers < 2) { canStart = false; reason = "Cần 2 người"; }
+                } else if (currentModeKey === 'custom_2v2') {
+                    if (totalPlayers < 4) { canStart = false; reason = "Cần 4 người"; }
+                } else if (currentModeKey === 'custom_solo') {
+                    if (totalPlayers < 2) { canStart = false; reason = "Cần tối thiểu 2 người"; }
+                }
+                
+                if (currentParty.some(p => p.status === 'pending')) {
+                    canStart = false;
+                    reason = "Đang chờ...";
+                }
+
+                btnSub.innerText = reason;
+                if (canStart) {
+                    btn.classList.remove('btn-disabled');
+                    btnIcon.innerHTML = '<i class="fa-solid fa-gamepad text-[3vmin] group-hover:rotate-12 transition"></i>';
+                } else {
+                    btn.classList.add('btn-disabled');
+                    btnIcon.innerHTML = '<i class="fa-solid fa-lock text-[3vmin]"></i>';
+                }
+
+            } else {
+                if (isReady) {
+                    btn.classList.add('ready-btn');
+                    btn.classList.remove('btn-disabled');
+                    btnText.innerText = "ĐÃ SẴN SÀNG";
+                    btnSub.innerText = "Đang chờ chủ phòng...";
+                    btnIcon.innerHTML = '<i class="fa-solid fa-check text-[3vmin]"></i>';
+                } else {
+                    btn.classList.remove('ready-btn'); 
+                    btn.classList.remove('btn-disabled');
+                    btnText.innerText = "SẴN SÀNG";
+                    btnSub.innerText = "Bấm để sẵn sàng";
+                    btnIcon.innerHTML = '<i class="fa-solid fa-play text-[3vmin]"></i>';
+                }
+            }
+        }
+
+        /* === LOGIC MODE SELECTION === */
+        const modeBtn = document.getElementById('btn-mode-select');
+        const modeOverlay = document.getElementById('mode-selection-overlay');
+        const modeNameEl = document.getElementById('current-mode-name');
+        const modeSubEl = document.getElementById('current-mode-sub');
+
+        const modes = {
+            normal: { name: "ĐẤU THƯỜNG", sub: "Solo Ngẫu Nhiên", slots: 0, color: "text-white" },
+            rank: { name: "XẾP HẠNG", sub: "Team 2 Người", slots: 1, color: "text-yellow-400" },
+            custom_solo: { name: "TÙY CHỌN ĐƠN", sub: "Loạn đấu (Min 2)", slots: 3, color: "text-green-400" },
+            custom_2v2: { name: "TÙY CHỌN 2VS2", sub: "Đấu Đội (Full 4)", slots: 3, color: "text-red-400" }
+        };
+
+        modeBtn.addEventListener('click', () => {
+            if (!isHost) {
+                alert("Chỉ chủ phòng mới được đổi chế độ!");
+                return;
+            }
+            modeOverlay.classList.remove('hidden');
+            modeOverlay.classList.add('flex');
+        });
+
+        function closeModeSelection() {
+            modeOverlay.classList.add('hidden');
+            modeOverlay.classList.remove('flex');
+        }
+
+        function selectMode(key) {
+            currentModeKey = key;
+            const mode = modes[key];
+            
+            modeNameEl.innerText = mode.name;
+            modeNameEl.className = `font-black text-lg italic ${mode.color}`;
+            modeSubEl.innerText = mode.sub;
+
+            // Init Party
+            currentParty = [];
+            for(let i=0; i<mode.slots; i++) {
+                currentParty.push({ status: 'empty', friend: null });
+            }
+            renderPartySlots();
+            
+            updateStartButtonState(); 
+
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active', 'border-yellow-500', 'bg-yellow-500/10'));
+            closeModeSelection();
+        }
+
+        /* === GAME FLOW === */
+        const startBtn = document.getElementById('btn-start');
+        const matchmakingOverlay = document.getElementById('matchmaking-overlay');
+        const matchFoundOverlay = document.getElementById('match-found-overlay');
+        const timerDisplay = document.getElementById('match-timer');
+        const cancelBtn = document.getElementById('cancel-match');
+        const acceptBtn = document.getElementById('accept-btn');
+        const progressBar = document.getElementById('accept-progress');
+
+        let matchTimerInterval;
+        let seconds = 0;
+        let foundTimer;
+
+        startBtn.addEventListener('click', () => {
+            // LOGIC KHÁCH
+            if (!isHost) {
+                isReady = !isReady;
+                updateStartButtonState();
+                return;
+            }
+
+            // LOGIC CHỦ PHÒNG (Double check)
+            if(startBtn.classList.contains('btn-disabled')) return;
+
+            matchmakingOverlay.classList.remove('hidden');
+            matchmakingOverlay.classList.add('flex');
+            
+            seconds = 0;
+            timerDisplay.innerText = "00:00";
+            
+            matchTimerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const secs = (seconds % 60).toString().padStart(2, '0');
+                timerDisplay.innerText = `${mins}:${secs}`;
+
+                if (seconds === 3) {
+                    foundMatch();
+                }
+            }, 1000);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            clearInterval(matchTimerInterval);
+            matchmakingOverlay.classList.add('hidden');
+            matchmakingOverlay.classList.remove('flex');
+        });
+
+        function foundMatch() {
+            clearInterval(matchTimerInterval);
+            matchmakingOverlay.classList.add('hidden');
+            matchmakingOverlay.classList.remove('flex');
+            matchFoundOverlay.classList.remove('hidden');
+            matchFoundOverlay.classList.add('flex');
+
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                progressBar.style.transition = 'width 5s linear';
+                progressBar.style.width = '0%';
+            }, 100);
+
+            foundTimer = setTimeout(() => {
+                resetLobby();
+            }, 5000);
+
+            acceptBtn.onclick = () => {
+                clearTimeout(foundTimer);
+                acceptBtn.innerText = "ĐANG VÀO...";
+                acceptBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                setTimeout(() => {
+                    alert("CHUYỂN SANG MÀN HÌNH CHỌN TƯỚNG!");
+                    resetLobby();
+                    acceptBtn.innerText = "CHẤP NHẬN";
+                    acceptBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }, 1000);
+            };
+        }
+
+        function resetLobby() {
+            matchFoundOverlay.classList.add('hidden');
+            matchFoundOverlay.classList.remove('flex');
+        }
+
+        window.onload = () => {
+            createParticles();
+            selectMode('rank');
+        };
+    </script>
+</body>
+</html>
